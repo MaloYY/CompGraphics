@@ -1,47 +1,74 @@
 from graphics import *
 import numpy as np
 
-def start():
-    win = GraphWin('Lab1', 500, 500)
+class Lab1():
+    def __init__(self, x, y, cx, cy, r):
+        self.win = GraphWin('Lab1', 500, 500)
 
-    x = -1
-    y = 2
+        #point coords
+        self.x = x
+        self.y = y
 
-    cx = 100
-    cy = 100
-    r = 50
+        #circle center coords
+        self.cx = cx
+        self.cy = cy
+        #circle radius
+        self.r = r
 
-    P = np.array([x, y, 1])
-    L = np.array([[1, 0, -cx], [0, 1, -cy], [-cx, -cy, cx ** 2 + cy ** 2 - r ** 2]])
+    def start(self):
+        if(abs(self.cx - self.x) > 50) and (abs(self.cy - self.y) > 50):
+            self.draw()
+        else:
+            print('A point inside a circle')
 
-    C = L.dot(P)
-    a = C[0]
-    b = C[1]
-    c = C[2]
+    def tangent_line_calc(self):
+        #point
+        P = np.array([self.x, self.y, 1])
+        #circle https://bit.ly/37tF5ix
+        L = np.array([[1, 0, -self.cx], [0, 1, -self.cy],
+                      [-self.cx, -self.cy, self.cx ** 2 + self.cy ** 2 - self.r ** 2]])
 
-    g1 = -2 * cx
-    g2 = -2 * cy
-    g3 = cx ** 2 + cy ** 2 - r ** 2
+        C = L.dot(P)
+        return C[0], C[1], C[2] #tangent line Ax + By + C = 0
 
-    coef1 = b ** 2 + a ** 2
-    coef2 = 2 * b * c - a * b * g1 + g2 * a ** 2
-    coef3 = c ** 2 - a * c * g1 + a ** 2 * g3
+    def intersect_calc(self, a, b, c):
+        #precalculated coefs from
+        '''
+        {
+            (x - cx)^2 + (y - cy)^2 - r^2 = 0, //the equation of the circle
+            ax + by + c = 0 //tangent line
+        }
+        '''
 
-    y1, y2 = np.roots([coef1, coef2, coef3])
-    x1 = (-b * y1 - c) / a
-    x2 = (-b * y2 - c) / a
+        g1 = -2 * self.cx
+        g2 = -2 * self.cy
+        g3 = self.cx ** 2 + self.cy ** 2 - self.r ** 2
 
-    pt = Point(x, y)
-    pt.draw(win)
+        coef1 = b ** 2 + a ** 2
+        coef2 = 2 * b * c - a * b * g1 + g2 * a ** 2
+        coef3 = c ** 2 - a * c * g1 + a ** 2 * g3
 
-    cir = Circle(center=Point(cx, cy), radius=r)
-    cir.draw(win)
+        #coef1 * y^2 + coef2 * y + coef3 = 0
+        y1, y2 = np.roots([coef1, coef2, coef3])
+        x1 = (-b * y1 - c) / a
+        x2 = (-b * y2 - c) / a
+        return x1, y1, x2, y2
 
-    line_1 = Line(pt, Point(x1, y1))
-    line_1.draw(win)
+    def draw(self):
+        a, b, c = self.tangent_line_calc()
+        line1_x, line1_y, line2_x, line2_y = self.intersect_calc(a, b, c)
 
-    line_2 = Line(pt, Point(x2, y2))
-    line_2.draw(win)
+        pt = Point(self.x, self.y)
+        pt.draw(self.win)
 
-    win.getMouse()
-    win.close()
+        cir = Circle(center=Point(self.cx, self.cy), radius=self.r)
+        cir.draw(self.win)
+
+        line_1 = Line(pt, Point(line1_x, line1_y))
+        line_1.draw(self.win)
+
+        line_2 = Line(pt, Point(line2_x, line2_y))
+        line_2.draw(self.win)
+
+        self.win.getMouse()
+        self.win.close()
