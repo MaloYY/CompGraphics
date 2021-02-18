@@ -1,46 +1,47 @@
 from graphics import *
+import numpy as np
 
 def start():
     win = GraphWin('Lab1', 500, 500)
 
-    dot_x = 15
-    dot_y = 15
+    x = -1
+    y = 2
 
-    a = 100
-    b = 100
-    radius = 50
+    cx = 100
+    cy = 100
+    r = 50
 
-    cathet = ((a - dot_x)**2 + (b - dot_y)**2)**(1./2)
-    denominator = (cathet**2 - radius**2)**(1./2)
-    k = radius / denominator
+    P = np.array([x, y, 1])
+    L = np.array([[1, 0, -cx], [0, 1, -cy], [-cx, -cy, cx ** 2 + cy ** 2 - r ** 2]])
 
+    C = L.dot(P)
+    a = C[0]
+    b = C[1]
+    c = C[2]
 
+    g1 = -2 * cx
+    g2 = -2 * cy
+    g3 = cx ** 2 + cy ** 2 - r ** 2
 
-    A = 1 + k ** 2
-    B = -2*k**2*dot_x + 2*k*dot_y - 2*k*b - 2*a
-    C = a**2 + b**2 + k**2*dot_x**2 - 2*k*dot_y*dot_x + 2*b*k*dot_x + dot_y - 2*b*dot_y**2 - radius**2
+    coef1 = b ** 2 + a ** 2
+    coef2 = 2 * b * c - a * b * g1 + g2 * a ** 2
+    coef3 = c ** 2 - a * c * g1 + a ** 2 * g3
 
-    D = B**2 - 4*A*C
+    y1, y2 = np.roots([coef1, coef2, coef3])
+    x1 = (-b * y1 - c) / a
+    x2 = (-b * y2 - c) / a
 
-    x_line1 = (-B + D**(1./2)) / (2*A)
-    #x_line2 = (-B - D**(1./2)) / (2*A)
-
-    y_line1 = k*(x_line1 - dot_x) + dot_y
-    #y_line2 = k*(x_line2 - dot_x) + dot_y
-
-    line1 = Line(Point(dot_x, dot_y), Point(x_line1, y_line1))
-    line1.draw(win)
-    #line2 = Line(Point(dot_x, dot_y), Point(x_line2, y_line2))
-    #line2.draw(win)
-
-    #y = 0.37 * (200 - 15) + dot_y
-    #ln = Line(Point(15, dot_y), Point(200, y))
-    #ln.draw(win)
-
-    pt = Point(dot_x, dot_y)
+    pt = Point(x, y)
     pt.draw(win)
-    cir = Circle(center=Point(a, b), radius=radius)
+
+    cir = Circle(center=Point(cx, cy), radius=r)
     cir.draw(win)
+
+    line_1 = Line(pt, Point(x1, y1))
+    line_1.draw(win)
+
+    line_2 = Line(pt, Point(x2, y2))
+    line_2.draw(win)
 
     win.getMouse()
     win.close()
